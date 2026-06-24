@@ -1,0 +1,92 @@
+// RetailSenseAI DBML for dbdiagram.io
+// Import this file at https://dbdiagram.io (Import > Paste or Upload)
+
+Table geolocation {
+  geolocation_zip_code_prefix varchar [pk]
+  geolocation_lat double
+  geolocation_lng double
+  geolocation_city varchar
+  geolocation_state varchar
+}
+
+Table category_translation {
+  product_category_name varchar [pk]
+  product_category_name_english varchar
+}
+
+Table clients {
+  customer_id varchar [pk]
+  customer_unique_id varchar
+  customer_zip_code_prefix varchar
+  customer_city varchar
+  customer_state varchar
+}
+
+Table sellers {
+  seller_id varchar [pk]
+  seller_zip_code_prefix varchar
+  seller_city varchar
+  seller_state varchar
+}
+
+Table products {
+  product_id varchar [pk]
+  product_category_name varchar
+  product_name_lenght int
+  product_description_lenght int
+  product_photos_qty int
+  product_weight_g double
+  product_length_cm double
+  product_height_cm double
+  product_width_cm double
+}
+
+Table orders {
+  order_id varchar [pk]
+  customer_id varchar
+  order_status varchar
+  order_purchase_timestamp datetime
+  order_approved_at datetime
+  order_delivered_carrier_date datetime
+  order_delivered_customer_date datetime
+  order_estimated_delivery_date datetime
+}
+
+Table order_items {
+  order_item_id int [pk, increment]
+  order_id varchar
+  order_item_sequence int
+  product_id varchar
+  seller_id varchar
+  shipping_limit_date datetime
+  price double
+  freight_value double
+}
+
+Table payments {
+  payment_id int [pk, increment]
+  order_id varchar
+  payment_sequential int
+  payment_type varchar
+  payment_installments int
+  payment_value double
+}
+
+Table reviews {
+  review_id varchar [pk]
+  order_id varchar
+  review_score int
+  review_comment_title varchar
+  review_comment_message text
+  review_creation_date datetime
+  review_answer_timestamp datetime
+}
+
+// Relationships
+Ref: products.product_category_name > category_translation.product_category_name
+Ref: orders.customer_id > clients.customer_id
+Ref: order_items.order_id > orders.order_id
+Ref: order_items.product_id > products.product_id
+Ref: order_items.seller_id > sellers.seller_id
+Ref: payments.order_id > orders.order_id
+Ref: reviews.order_id > orders.order_id
