@@ -4,8 +4,9 @@ Usage:
     python -m src.etl --db-path db/retailsense.db --raw-dir data/raw
 
 The script reads the standard Olist CSVs (if present), cleans column names,
-parses common date columns, and writes tables into the SQLite database using
-transactions and chunked writes for large files.
+parses common date columns, coerces numeric columns, writes tables into the
+SQLite database using transactions and chunked writes, then runs integrity
+checks and creates recommended indexes.
 """
 from __future__ import annotations
 
@@ -15,7 +16,6 @@ import sqlite3
 from typing import Dict, Iterable, List, Optional
 
 import pandas as pd
-
 
 CSV_TABLE_MAP: Dict[str, str] = {
     'olist_customers_dataset.csv': 'customers',
@@ -40,7 +40,7 @@ def find_csv_files(raw_dir: str) -> Dict[str, str]:
 
 
 def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
-    # Normalize column names: strip
+    # Normalize column names: strip whitespace
     df = df.rename(columns=lambda c: c.strip())
     return df
 
@@ -62,19 +62,42 @@ def load_csv_to_sqlite(
     chunksize: Optional[int] = 100_000,
     if_exists: str = 'replace',
 ):
-    """Load a CSV into sqlite using pandas chunked to_sql."""
+    """Load a CSV into sqlite using pandas chunked to_sql with basic coercions."""
     print(f'Loading {os.path.basename(csv_path)} -> {table_name} (chunksize={chunksize})')
 
     # detect parse_dates by column names (sample)
-    sample = pd.read_csv(csv_path, nrows=100)
-    parse_dates = _guess_parse_dates(sample.columns)
+    try:
+        sample = pd.read_csv(csv_path, nrows=100)
+        parse_dates = _guess_parse_dates(sample.columns)
+    except Exception:
+        sample = pd.DataFrame()
+        parse_dates = []
 
     reader = pd.read_csv(csv_path, chunksize=chunksize, parse_dates=parse_dates, low_memory=False)
 
     first = True
     for chunk in reader:
         chunk = _clean_column_names(chunk)
+        # normalize empty strings to NA
         chunk = chunk.replace({'': pd.NA})
+
+        # coerce date-like columns
+        for col in chunk.columns:
+            lc = col.lower()
+            if any(tok in lc for tok in ['date', 'timestamp', 'time']):
+                try:
+                    chunk[col] = pd.to_datetime(chunk[col], errors='coerce')
+                except Exception:
+                    pass
+
+        # coerce numeric-like columns using heuristics
+        num_tokens = ['price', 'total', 'amount', 'value', 'payment']
+        for col in chunk.columns:
+            lc = col.lower()
+            if any(tok in lc for tok in num_tokens):
+                chunk[col] = pd.to_numeric(chunk[col], errors='coerce')
+
+        # write chunk to sqlite
         chunk.to_sql(
             name=table_name,
             con=conn,
@@ -91,6 +114,7 @@ def create_indices(conn: sqlite3.Connection):
         "CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);",
         "CREATE INDEX IF NOT EXISTS idx_products_id ON products(product_id);",
         "CREATE INDEX IF NOT EXISTS idx_customers_id ON customers(customer_id);",
+        "CREATE INDEX IF NOT EXISTS idx_orders_purchase_ts ON orders(order_purchase_timestamp);",
     ]
     for sql in idx_cmds:
         try:
@@ -100,10 +124,58 @@ def create_indices(conn: sqlite3.Connection):
     conn.commit()
 
 
+def run_integrity_checks(conn: sqlite3.Connection) -> None:
+    """Run quick integrity diagnostics and print summary."""
+    cur = conn.cursor()
+    print('\n== Integrity checks ==')
+
+    # summary counts (orders)
+    try:
+        cur.execute("SELECT COUNT(*) FROM orders;")
+        total_orders = cur.fetchone()[0]
+    except Exception:
+        print('orders table missing')
+        total_orders = 0
+
+    try:
+        cur.execute(
+            "SELECT "
+            "SUM(CASE WHEN order_id IS NULL THEN 1 ELSE 0 END) AS null_order_id, "
+            "SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS null_customer_id, "
+            "SUM(CASE WHEN order_purchase_timestamp IS NULL THEN 1 ELSE 0 END) AS null_purchase_ts "
+            "FROM orders;"
+        )
+        nulls = cur.fetchone()
+        print(f'orders total={total_orders}, nulls(order_id, customer_id, purchase_ts)={nulls}')
+    except Exception:
+        print('cannot compute null summary for orders')
+
+    # orphan order_items
+    try:
+        cur.execute("SELECT COUNT(*) FROM order_items oi LEFT JOIN orders o ON oi.order_id = o.order_id WHERE o.order_id IS NULL;")
+        orphan = cur.fetchone()[0]
+        print(f'orphan order_items (no order): {orphan}')
+    except Exception:
+        print('order_items or orders table missing')
+
+    # duplicate order_items groups
+    try:
+        cur.execute(
+            "SELECT COUNT(*) FROM (SELECT order_id, product_id, COUNT(*) as cnt FROM order_items GROUP BY order_id, product_id HAVING cnt>1);"
+        )
+        dup = cur.fetchone()[0]
+        print(f'duplicate order_items groups: {dup}')
+    except Exception:
+        print('cannot compute duplicates on order_items')
+
+    print('== Integrity checks complete ==\n')
+
+
 def etl(db_path: str, raw_dir: str, tables: Optional[List[str]] = None, chunksize: int = 100_000, drop_existing: bool = False):
     os.makedirs(os.path.dirname(db_path) or '.', exist_ok=True)
     conn = sqlite3.connect(db_path)
     try:
+        # minor optimizations
         conn.execute('PRAGMA journal_mode = WAL;')
         conn.execute('PRAGMA synchronous = NORMAL;')
 
@@ -122,6 +194,11 @@ def etl(db_path: str, raw_dir: str, tables: Optional[List[str]] = None, chunksiz
             load_csv_to_sqlite(csv_path, table_name, conn, chunksize=chunksize, if_exists='replace')
 
         create_indices(conn)
+        # run integrity diagnostics after load and indexing
+        try:
+            run_integrity_checks(conn)
+        except Exception:
+            print('Integrity checks failed or tables missing')
     finally:
         conn.close()
 
