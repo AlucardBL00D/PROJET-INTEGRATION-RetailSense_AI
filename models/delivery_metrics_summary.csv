@@ -1,0 +1,4 @@
+model,val_mae
+linear,5.546986883740076
+random_forest,5.081960907489309
+gradient_boost,4.96701521591452
