@@ -7,8 +7,8 @@ data/processed/
 notebooks/runs/
 *.db
 *.sqlite
-venv/
 __pycache__/
 *.db
 *.pkl
 *.keras
+.venv/
