@@ -85,11 +85,14 @@ def health() -> HealthResponse:
 def predict_churn(payload: ChurnRequest) -> ChurnResponse:
     try:
         model = load_model("churn_best.joblib")
+        preprocessor = load_model("preprocessor_cls.joblib")
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     row = pd.DataFrame([payload.model_dump()])
-    probability = float(model.predict_proba(row)[0, 1])
+    # Transform categorical features
+    row_transformed = preprocessor.transform(row)
+    probability = float(model.predict_proba(row_transformed)[0, 1])
     prediction = int(probability >= 0.5)
     return ChurnResponse(prediction=prediction, risk_probability=probability)
 

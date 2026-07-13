@@ -184,7 +184,7 @@ python -m venv venv
 Windows :
 
 ```bash
-venv\Scripts\activate
+& .\.venv\Scripts\Activate.ps1                        
 ```
 
 Linux / Mac :
@@ -206,7 +206,7 @@ pip install -r requirements.txt
 ## Lancer l'API
 
 ```bash
-uvicorn api.main:app --reload
+uvicorn api.main:app --reload --reload-dir api --host 127.0.0.1 --port 8000
 ```
 
 Documentation Swagger :
