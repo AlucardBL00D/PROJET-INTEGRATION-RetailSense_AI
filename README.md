@@ -137,13 +137,15 @@ Pandas / NumPy
 * Prévisions de ventes
 * Recommandations produits
 * Détection d'anomalies
+* Analyse du sentiment d'avis
 
 ## Application Flutter
 
 * Tableau de bord
-* Gestion des clients
-* Consultation des prédictions
-* Recommandations personnalisées
+* Écran de connexion
+* Fiche client (segment + churn + sentiment)
+* Prévision de demande
+* Recommandations personnalisées et score d'anomalie
 
 ---
 
@@ -209,10 +211,33 @@ pip install -r requirements.txt
 uvicorn api.main:app --reload --reload-dir api --host 127.0.0.1 --port 8000
 ```
 
+Variables d'environnement (préparation phase 8) :
+
+```bash
+RETAILSENSE_MODELS_DIR=./models
+RETAILSENSE_ANOMALY_THRESHOLD=2.5
+RETAILSENSE_API_VERSION=1.1.0
+RETAILSENSE_CORS_ORIGINS=*
+```
+
 Documentation Swagger :
 
 ```text
 http://localhost:8000/docs
+```
+
+## Lancer l'application Flutter
+
+```bash
+cd app_flutter
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+
+Android Emulator (API locale) :
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
 
 ---

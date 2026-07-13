@@ -1,16 +1,39 @@
-# app_flutter
+# RetailSense Flutter App
 
-A new Flutter project.
+Application multiplateforme connectee a l'API FastAPI de RetailSense.
 
-## Getting Started
+## Ecrans disponibles
 
-This project is a starting point for a Flutter application.
+- Connexion
+- Dashboard (etat API + indicateurs)
+- Fiche client (segmentation + churn + sentiment)
+- Prevision de demande
+- Recommandations produits + score d'anomalie
 
-A few resources to get you started if this is your first Flutter project:
+## Architecture
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- `lib/app.dart` : shell applicatif et navigation
+- `lib/config/api_config.dart` : URL API via `--dart-define`
+- `lib/services/api_client.dart` : appels HTTP et gestion des erreurs
+- `lib/screens/*.dart` : ecrans metier
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Lancer l'application
+
+Depuis `app_flutter/`:
+
+```bash
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+
+Android emulator (si API locale sur machine hote):
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
+```
+
+Web:
+
+```bash
+flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```

@@ -7,12 +7,13 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:app_flutter/main.dart';
+import 'package:app_flutter/app.dart';
 
 void main() {
   testWidgets('RetailSense app loads', (WidgetTester tester) async {
     await tester.pumpWidget(const RetailSenseApp());
 
     expect(find.text('RetailSense AI'), findsOneWidget);
+    expect(find.text('Se connecter'), findsOneWidget);
   });
 }
