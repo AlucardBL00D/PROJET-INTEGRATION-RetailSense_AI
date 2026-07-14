@@ -12,6 +12,8 @@ class RecommendationsScreen extends StatefulWidget {
 }
 
 class _RecommendationsScreenState extends State<RecommendationsScreen> {
+  static const int _expectedAnomalyFeatureCount = 7;
+
   final _segmentController = TextEditingController(text: '2');
   final _riskController = TextEditingController(text: '0.74');
   final _categoriesController = TextEditingController(
@@ -19,7 +21,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   );
   final _topKController = TextEditingController(text: '5');
   final _anomalyFeaturesController = TextEditingController(
-    text: '0.1,0.2,0.3,0.1,0.0,0.5,0.2,0.1',
+    text: '0.1,0.2,0.3,0.1,0.0,0.5,0.2',
   );
 
   bool _loading = false;
@@ -61,6 +63,15 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
           .split(',')
           .map((value) => double.parse(value.trim()))
           .toList();
+
+      if (features.length != _expectedAnomalyFeatureCount) {
+        setState(() {
+          _error =
+              'Le modele d\'anomalie attend $_expectedAnomalyFeatureCount features, mais ${features.length} ont ete envoyees.';
+          _loading = false;
+        });
+        return;
+      }
 
       final anomaly = await widget.apiClient.predictAnomaly(features);
 
@@ -111,8 +122,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
         const SizedBox(height: 12),
         TextField(
           controller: _anomalyFeaturesController,
-          decoration: const InputDecoration(
-            labelText: 'Features anomalie (comma separated)',
+          decoration: InputDecoration(
+            labelText:
+                'Features anomalie ($_expectedAnomalyFeatureCount valeurs, comma separated)',
             border: OutlineInputBorder(),
           ),
         ),
