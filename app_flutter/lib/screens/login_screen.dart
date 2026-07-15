@@ -61,6 +61,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text(
                     'Connectez-vous pour piloter les services IA du retail.',
                   ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Auteur: Xavier Archambault',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.black54),
+                  ),
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: _emailController,
