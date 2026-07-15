@@ -30,6 +30,7 @@ jobs:
 
       - name: Run API tests
         env:
+          PYTHONPATH: .
           RETAILSENSE_MODELS_DIR: ./models
           RETAILSENSE_MODEL_REGISTRY_PATH: ./models/model_registry.json
           RETAILSENSE_REQUEST_LOG_ENABLED: "false"
