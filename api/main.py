@@ -1,6 +1,10 @@
 import logging
 import os
+import time
+from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
+import json
 from typing import Any, Dict, List, Optional
 
 import joblib
@@ -13,11 +17,19 @@ from pydantic import BaseModel, Field
 ROOT = Path(__file__).resolve().parents[1]
 MODELS_DIR = Path(os.getenv("RETAILSENSE_MODELS_DIR", ROOT / "models"))
 ANOMALY_THRESHOLD = float(os.getenv("RETAILSENSE_ANOMALY_THRESHOLD", "2.5"))
+REQUEST_LOG_ENABLED = os.getenv("RETAILSENSE_REQUEST_LOG_ENABLED", "true").lower() == "true"
+LOG_LEVEL = os.getenv("RETAILSENSE_LOG_LEVEL", "INFO").upper()
+MODEL_REGISTRY_PATH = Path(os.getenv("RETAILSENSE_MODEL_REGISTRY_PATH", MODELS_DIR / "model_registry.json"))
 
 API_TITLE = "RetailSenseAI API"
 API_VERSION = os.getenv("RETAILSENSE_API_VERSION", "1.1.0")
 
 logger = logging.getLogger("retailsense.api")
+
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+)
 
 app = FastAPI(
     title=API_TITLE,
@@ -123,6 +135,7 @@ class HealthResponse(BaseModel):
 
 MODEL_CACHE: Dict[str, Any] = {}
 MODEL_LOAD_ERRORS: Dict[str, str] = {}
+MODEL_REGISTRY: Dict[str, Any] = {}
 
 CORE_MODEL_FILES = [
     "churn_best.joblib",
@@ -149,6 +162,22 @@ def _load_joblib_model(name: str) -> Any:
     model = joblib.load(model_path)
     MODEL_CACHE[name] = model
     return model
+
+
+def _load_model_registry() -> None:
+    MODEL_REGISTRY.clear()
+    if not MODEL_REGISTRY_PATH.exists():
+        logger.warning("Model registry file not found at %s", MODEL_REGISTRY_PATH)
+        return
+    try:
+        raw = MODEL_REGISTRY_PATH.read_text(encoding="utf-8")
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            MODEL_REGISTRY.update(parsed)
+        else:
+            logger.warning("Model registry has invalid format (expected object)")
+    except Exception as exc:  # pragma: no cover - defensive branch
+        logger.exception("Failed to load model registry: %s", exc)
 
 
 def _warmup_models() -> None:
@@ -254,8 +283,43 @@ def _compute_anomaly_score(features: List[float]) -> float:
 
 @app.on_event("startup")
 def startup_event() -> None:
+    _load_model_registry()
     _warmup_models()
     logger.info("RetailSenseAPI started. Loaded models: %s", list(MODEL_CACHE.keys()))
+
+
+@app.middleware("http")
+async def request_logging_middleware(request, call_next):
+    request_id = request.headers.get("x-request-id", str(uuid4()))
+    started = time.perf_counter()
+    response = None
+
+    if REQUEST_LOG_ENABLED:
+        logger.info(
+            "request.started request_id=%s method=%s path=%s client=%s",
+            request_id,
+            request.method,
+            request.url.path,
+            getattr(request.client, "host", "unknown"),
+        )
+
+    try:
+        response = await call_next(request)
+        return response
+    finally:
+        elapsed_ms = round((time.perf_counter() - started) * 1000, 2)
+        if response is not None:
+            response.headers["X-Request-ID"] = request_id
+            response.headers["X-Process-Time-ms"] = str(elapsed_ms)
+        if REQUEST_LOG_ENABLED:
+            logger.info(
+                "request.completed request_id=%s method=%s path=%s status=%s latency_ms=%s",
+                request_id,
+                request.method,
+                request.url.path,
+                getattr(response, "status_code", "error"),
+                elapsed_ms,
+            )
 
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])
@@ -351,8 +415,14 @@ def predict_sentiment(payload: SentimentRequest) -> SentimentResponse:
 
 @app.get("/metadata/models", tags=["system"])
 def model_metadata() -> Dict[str, Any]:
+    registry_models = MODEL_REGISTRY.get("models", {}) if isinstance(MODEL_REGISTRY, dict) else {}
+    now_utc = datetime.now(timezone.utc).isoformat()
+
     return {
+        "timestamp_utc": now_utc,
         "models_dir": str(MODELS_DIR),
+        "model_registry_path": str(MODEL_REGISTRY_PATH),
         "loaded": sorted(MODEL_CACHE.keys()),
         "errors": MODEL_LOAD_ERRORS,
+        "model_versions": registry_models,
     }

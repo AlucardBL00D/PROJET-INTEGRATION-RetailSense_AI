@@ -19,6 +19,9 @@ Swagger / OpenAPI:
 - `RETAILSENSE_ANOMALY_THRESHOLD` (defaut: `2.5`)
 - `RETAILSENSE_API_VERSION` (defaut: `1.1.0`)
 - `RETAILSENSE_CORS_ORIGINS` (defaut: `*`, liste separee par virgule)
+- `RETAILSENSE_MODEL_REGISTRY_PATH` (defaut: `./models/model_registry.json`)
+- `RETAILSENSE_REQUEST_LOG_ENABLED` (defaut: `true`)
+- `RETAILSENSE_LOG_LEVEL` (defaut: `INFO`)
 
 Exemple PowerShell:
 
@@ -84,4 +87,20 @@ Recommendations:
 	"recent_categories": ["electronics", "accessories"],
 	"top_k": 5
 }
+```
+
+## Docker (phase 8)
+
+Depuis la racine du projet:
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+```
+
+Test rapide:
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/metadata/models
 ```

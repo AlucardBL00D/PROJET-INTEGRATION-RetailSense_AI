@@ -1,0 +1,16 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: retailsense_api
+    env_file:
+      - .env
+    environment:
+      RETAILSENSE_MODELS_DIR: /app/models
+      RETAILSENSE_MODEL_REGISTRY_PATH: /app/models/model_registry.json
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models:ro
+    restart: unless-stopped

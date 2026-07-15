@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: retailsense-api
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: RETAILSENSE_MODELS_DIR
+        value: /app/models
+      - key: RETAILSENSE_MODEL_REGISTRY_PATH
+        value: /app/models/model_registry.json
+      - key: RETAILSENSE_ANOMALY_THRESHOLD
+        value: "2.5"
+      - key: RETAILSENSE_API_VERSION
+        value: "1.1.0"
+      - key: RETAILSENSE_CORS_ORIGINS
+        value: "*"
+      - key: RETAILSENSE_REQUEST_LOG_ENABLED
+        value: "true"
+      - key: RETAILSENSE_LOG_LEVEL
+        value: "INFO"

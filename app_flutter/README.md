@@ -37,3 +37,18 @@ Web:
 ```bash
 flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000
 ```
+
+## Build APK (release)
+
+```bash
+flutter pub get
+flutter build apk --release --dart-define=API_BASE_URL=https://retailsense-api.onrender.com
+```
+
+Important: remplace `retailsense-api.onrender.com` par ton URL publique reelle.
+
+APK de sortie:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```

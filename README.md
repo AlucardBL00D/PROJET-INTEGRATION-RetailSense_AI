@@ -240,6 +240,79 @@ Android Emulator (API locale) :
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
 
+## Phase 8 - Deploiement et industrialisation legere
+
+### Dockeriser l'API
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+```
+
+Verifier l'API:
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/metadata/models
+```
+
+Arret:
+
+```bash
+docker compose down
+```
+
+### Variables d'environnement de production
+
+- `RETAILSENSE_MODELS_DIR`
+- `RETAILSENSE_MODEL_REGISTRY_PATH`
+- `RETAILSENSE_ANOMALY_THRESHOLD`
+- `RETAILSENSE_API_VERSION`
+- `RETAILSENSE_CORS_ORIGINS`
+- `RETAILSENSE_REQUEST_LOG_ENABLED`
+- `RETAILSENSE_LOG_LEVEL`
+
+### Deployer l'API sur Render (gratuit)
+
+1. Pousser le projet sur GitHub.
+2. Aller sur Render, choisir **New +** puis **Blueprint**.
+3. Selectionner le repo RetailSenseAI (Render detecte automatiquement `render.yaml`).
+4. Lancer le deploiement et attendre le statut **Live**.
+5. Ouvrir l'URL publique Render et verifier:
+
+```bash
+curl https://retailsense-api.onrender.com/health
+curl https://retailsense-api.onrender.com/metadata/models
+```
+
+Important: remplace `retailsense-api.onrender.com` par ton URL reelle Render.
+
+### Versioning minimal des modeles
+
+Le fichier `models/model_registry.json` sert de registre simple des artefacts en production.
+Le endpoint `GET /metadata/models` expose les versions chargees.
+
+### Build APK Android (release)
+
+Depuis `app_flutter/`:
+
+```bash
+flutter pub get
+flutter build apk --release --dart-define=API_BASE_URL=https://retailsense-api.onrender.com
+```
+
+Important: remplace `retailsense-api.onrender.com` par ton URL publique reelle.
+
+APK de sortie:
+
+```text
+app_flutter/build/app/outputs/flutter-apk/app-release.apk
+```
+
+### Documentation detaillee
+
+Guide complet de phase 8: `docs/PHASE_8_DEPLOIEMENT.md`
+
 ---
 
 # Jeux de données
