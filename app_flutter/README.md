@@ -26,6 +26,25 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
 ```
 
+Telephone Android physique (API locale sur ton PC, meme Wi-Fi):
+
+```powershell
+cd ..
+.\scripts\run_api_lan.ps1
+```
+
+Dans un second terminal:
+
+```powershell
+.\scripts\run_flutter_phone.ps1
+```
+
+Commande manuelle equivalente:
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://<IP_LAN_DU_PC>:8000
+```
+
 Android emulator (si API locale sur machine hote):
 
 ```bash

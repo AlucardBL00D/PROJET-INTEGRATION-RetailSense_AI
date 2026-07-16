@@ -211,6 +211,18 @@ pip install -r requirements.txt
 uvicorn api.main:app --reload --reload-dir api --host 127.0.0.1 --port 8000
 ```
 
+Pour tester depuis un telephone (meme Wi-Fi que le PC), lance l'API en LAN:
+
+```powershell
+.\scripts\run_api_lan.ps1
+```
+
+Sinon commande manuelle:
+
+```bash
+uvicorn api.main:app --reload --reload-dir api --host 0.0.0.0 --port 8000
+```
+
 Variables d'environnement (préparation phase 8) :
 
 ```bash
@@ -232,6 +244,18 @@ http://localhost:8000/docs
 cd app_flutter
 flutter pub get
 flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+
+Telephone Android physique (API sur le PC):
+
+```powershell
+.\scripts\run_flutter_phone.ps1
+```
+
+Commande manuelle avec IP LAN du PC (exemple):
+
+```bash
+flutter run --dart-define=API_BASE_URL=http://192.168.1.25:8000
 ```
 
 Android Emulator (API locale) :
