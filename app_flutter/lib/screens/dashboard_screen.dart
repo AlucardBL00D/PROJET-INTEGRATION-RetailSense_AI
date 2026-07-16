@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../services/api_client.dart';
+import '../widgets/screen_intro_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   final ApiClient apiClient;
@@ -57,6 +58,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(height: 8),
         Text('Etat API: $_status'),
         const SizedBox(height: 16),
+        const ScreenIntroCard(
+          title: 'Ce que cette section montre',
+          description:
+              'Vue executive de la plateforme: disponibilite du service, modeles charges et cas d\'usage metier disponibles.',
+          bullets: [
+            'Verifier rapidement que la plateforme est operationnelle.',
+            'Presenter les capacites IA actives a un client.',
+            'Servir de page de depart avant une demo detaillee.',
+          ],
+        ),
+        const SizedBox(height: 16),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -96,6 +108,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: SizedBox(height: 220, child: _buildTrendChart()),
           ),
         ),
+        const SizedBox(height: 16),
+        const Text(
+          'Services IA que vous pouvez proposer',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 10),
+        const _ServiceTile(
+          icon: Icons.person_search,
+          title: 'Profil client intelligent',
+          subtitle: 'Segmentation RFM, risque de churn et sentiment en 1 page.',
+        ),
+        const _ServiceTile(
+          icon: Icons.trending_up,
+          title: 'Prevision de la demande',
+          subtitle:
+              'Projection des commandes a court terme pour planifier stock et equipe.',
+        ),
+        const _ServiceTile(
+          icon: Icons.recommend,
+          title: 'Recommendations personnalisees',
+          subtitle:
+              'Produits proposes selon segment, categories recentes et risque de depart.',
+        ),
+        const _ServiceTile(
+          icon: Icons.shield,
+          title: 'Surveillance d\'anomalies',
+          subtitle:
+              'Detection d\'activites atypiques ou suspectes en quasi temps reel.',
+        ),
       ],
     );
   }
@@ -123,6 +164,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
             dotData: const FlDotData(show: false),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ServiceTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _ServiceTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        subtitle: Text(subtitle),
       ),
     );
   }

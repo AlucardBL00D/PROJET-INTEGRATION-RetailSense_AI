@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/api_client.dart';
+import '../widgets/screen_intro_card.dart';
 
 class ClientScreen extends StatefulWidget {
   final ApiClient apiClient;
@@ -95,6 +96,17 @@ class _ClientScreenState extends State<ClientScreen> {
             const SizedBox(height: 8),
             const Text(
               'Segment + risque de churn + sentiment client en un clic.',
+            ),
+            const SizedBox(height: 14),
+            const ScreenIntroCard(
+              title: 'A quoi sert la Fiche client IA',
+              description:
+                  'Cet ecran transforme quelques indicateurs client en decisions actionnables pour la retention et la relation client.',
+              bullets: [
+                'Identifier le segment client automatiquement.',
+                'Estimer la probabilite de churn pour prioriser les actions.',
+                'Analyser le ton des avis clients pour mesurer la satisfaction.',
+              ],
             ),
             const SizedBox(height: 16),
             Wrap(

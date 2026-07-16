@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/api_client.dart';
+import '../widgets/screen_intro_card.dart';
 
 class RecommendationsScreen extends StatefulWidget {
   final ApiClient apiClient;
@@ -12,22 +13,16 @@ class RecommendationsScreen extends StatefulWidget {
 }
 
 class _RecommendationsScreenState extends State<RecommendationsScreen> {
-  static const int _expectedAnomalyFeatureCount = 7;
-
   final _segmentController = TextEditingController(text: '2');
   final _riskController = TextEditingController(text: '0.74');
   final _categoriesController = TextEditingController(
     text: 'electronics,accessories',
   );
   final _topKController = TextEditingController(text: '5');
-  final _anomalyFeaturesController = TextEditingController(
-    text: '0.1,0.2,0.3,0.1,0.0,0.5,0.2',
-  );
 
   bool _loading = false;
   String? _error;
   List<String> _items = const [];
-  Map<String, dynamic>? _anomaly;
 
   @override
   void dispose() {
@@ -35,11 +30,10 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
     _riskController.dispose();
     _categoriesController.dispose();
     _topKController.dispose();
-    _anomalyFeaturesController.dispose();
     super.dispose();
   }
 
-  Future<void> _runInference() async {
+  Future<void> _runRecommendations() async {
     setState(() {
       _loading = true;
       _error = null;
@@ -59,27 +53,10 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
         topK: int.parse(_topKController.text),
       );
 
-      final features = _anomalyFeaturesController.text
-          .split(',')
-          .map((value) => double.parse(value.trim()))
-          .toList();
-
-      if (features.length != _expectedAnomalyFeatureCount) {
-        setState(() {
-          _error =
-              'Le modele d\'anomalie attend $_expectedAnomalyFeatureCount features, mais ${features.length} ont ete envoyees.';
-          _loading = false;
-        });
-        return;
-      }
-
-      final anomaly = await widget.apiClient.predictAnomaly(features);
-
       setState(() {
         _items = (recommendations['recommendations'] as List<dynamic>)
             .map((item) => item.toString())
             .toList();
-        _anomaly = anomaly;
         _loading = false;
       });
     } catch (exc) {
@@ -96,12 +73,23 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'Recommandations + anomalie',
+          'Recommandations produits',
           style: Theme.of(
             context,
           ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
+        const ScreenIntroCard(
+          title: 'A quoi sert Recommandations',
+          description:
+              'Cet ecran genere des recommandations personnalisees selon le segment et le risque churn du client.',
+          bullets: [
+            'Proposer des produits pertinents selon le profil client.',
+            'Prioriser des offres retention si risque churn eleve.',
+            'Ameliorer le panier moyen avec des produits complementaires.',
+          ],
+        ),
+        const SizedBox(height: 12),
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -120,19 +108,10 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        TextField(
-          controller: _anomalyFeaturesController,
-          decoration: InputDecoration(
-            labelText:
-                'Features anomalie ($_expectedAnomalyFeatureCount valeurs, comma separated)',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: _loading ? null : _runInference,
+          onPressed: _loading ? null : _runRecommendations,
           icon: const Icon(Icons.recommend),
-          label: Text(_loading ? 'Chargement...' : 'Generer les resultats'),
+          label: Text(_loading ? 'Chargement...' : 'Generer recommandations'),
         ),
         if (_error != null) ...[
           const SizedBox(height: 12),
@@ -151,23 +130,6 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                 leading: const Icon(Icons.shopping_bag),
                 title: Text(item),
               ),
-            ),
-          ),
-        ],
-        if (_anomaly != null) ...[
-          const SizedBox(height: 12),
-          Card(
-            color: ((_anomaly!['is_anomaly'] as bool?) ?? false)
-                ? const Color(0xFFFFF1F1)
-                : const Color(0xFFEFFAF3),
-            child: ListTile(
-              leading: Icon(
-                ((_anomaly!['is_anomaly'] as bool?) ?? false)
-                    ? Icons.warning
-                    : Icons.check_circle,
-              ),
-              title: Text('Score anomalie: ${_anomaly!['anomaly_score']}'),
-              subtitle: Text('Seuil: ${_anomaly!['threshold']}'),
             ),
           ),
         ],
