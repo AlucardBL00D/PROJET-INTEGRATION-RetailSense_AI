@@ -37,6 +37,11 @@ app = FastAPI(
     description="REST API for RetailSenseAI model inference services.",
 )
 
+
+@app.get("/")
+def root() -> Dict[str, str]:
+    return {"status": "ok", "service": API_TITLE, "docs": "/docs"}
+
 allowed_origins = os.getenv("RETAILSENSE_CORS_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,

@@ -1,0 +1,8 @@
+# Exclude artifacts not needed to build/run the API on FastAPI Cloud
+powerbi/
+app_flutter/
+notebooks/
+data/raw/
+data/processed/non_utiliser/
+.vscode/
+.pytest_cache/
