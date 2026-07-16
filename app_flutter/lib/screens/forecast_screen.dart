@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../services/api_client.dart';
+import '../widgets/screen_intro_card.dart';
 
 class ForecastScreen extends StatefulWidget {
   final ApiClient apiClient;
@@ -73,6 +74,17 @@ class _ForecastScreenState extends State<ForecastScreen> {
         ),
         const SizedBox(height: 10),
         const Text('Entrez une serie historique de commandes journalieres.'),
+        const SizedBox(height: 14),
+        const ScreenIntroCard(
+          title: 'A quoi sert la Prevision ventes',
+          description:
+              'Cette section anticipe les volumes a venir pour aider la planification operationnelle et commerciale.',
+          bullets: [
+            'Ajuster le stock selon la demande attendue.',
+            'Planifier les promotions et les ressources equipe.',
+            'Reduire les ruptures et les surstocks.',
+          ],
+        ),
         const SizedBox(height: 14),
         TextField(
           controller: _ordersController,
