@@ -14,9 +14,9 @@ class ClientScreen extends StatefulWidget {
 
 class _ClientScreenState extends State<ClientScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _recencyController = TextEditingController(text: '0.2');
-  final _frequencyController = TextEditingController(text: '0.8');
-  final _monetaryController = TextEditingController(text: '0.6');
+  final _recencyController = TextEditingController(text: '250');
+  final _frequencyController = TextEditingController(text: '2');
+  final _monetaryController = TextEditingController(text: '450');
   final _priceController = TextEditingController(text: '150');
   final _reviewController = TextEditingController(
     text: 'Excellent service and fast delivery',
@@ -113,9 +113,9 @@ class _ClientScreenState extends State<ClientScreen> {
               spacing: 14,
               runSpacing: 14,
               children: [
-                _numberField(_recencyController, 'Recency (0-1)'),
-                _numberField(_frequencyController, 'Frequency (0-1)'),
-                _numberField(_monetaryController, 'Monetary (0-1)'),
+                _numberField(_recencyController, 'Recency (jours, >=0)'),
+                _numberField(_frequencyController, 'Frequency (>=1)'),
+                _numberField(_monetaryController, 'Monetary (>=0)'),
                 _numberField(_priceController, 'Panier total'),
               ],
             ),
@@ -147,18 +147,21 @@ class _ClientScreenState extends State<ClientScreen> {
               _ResultTile(
                 title: 'Segmentation',
                 value: 'Cluster ${_segmentation!['cluster']}',
+                model: _segmentation!['model']?.toString(),
               ),
             if (_churn != null)
               _ResultTile(
                 title: 'Risque churn',
                 value:
                     '${(((_churn!['risk_probability'] as num?) ?? 0) * 100).toStringAsFixed(1)}% (classe ${_churn!['prediction']})',
+                model: _churn!['model']?.toString(),
               ),
             if (_sentiment != null)
               _ResultTile(
                 title: 'Sentiment',
                 value:
                     '${_sentiment!['label']} (conf ${_sentiment!['confidence']})',
+                model: _sentiment!['model']?.toString(),
               ),
           ],
         ),
@@ -193,8 +196,9 @@ class _ClientScreenState extends State<ClientScreen> {
 class _ResultTile extends StatelessWidget {
   final String title;
   final String value;
+  final String? model;
 
-  const _ResultTile({required this.title, required this.value});
+  const _ResultTile({required this.title, required this.value, this.model});
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +206,7 @@ class _ResultTile extends StatelessWidget {
       child: ListTile(
         leading: const Icon(Icons.check_circle_outline),
         title: Text(title),
-        subtitle: Text(value),
+        subtitle: Text('$value\nModele: ${model ?? 'non disponible'}'),
       ),
     );
   }

@@ -24,6 +24,7 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
   double? _score;
   double? _threshold;
   bool? _isAnomaly;
+  String? _model;
 
   @override
   void dispose() {
@@ -57,6 +58,7 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
         _score = (response['anomaly_score'] as num?)?.toDouble();
         _threshold = (response['threshold'] as num?)?.toDouble();
         _isAnomaly = response['is_anomaly'] as bool?;
+        _model = response['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -119,7 +121,7 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
               leading: Icon(_isAnomaly! ? Icons.warning : Icons.check_circle),
               title: Text('Score: ${_score!.toStringAsFixed(3)}'),
               subtitle: Text(
-                'Seuil: ${_threshold!.toStringAsFixed(3)} - ${_isAnomaly! ? 'Anomalie detectee' : 'Comportement normal'}',
+                'Seuil: ${_threshold!.toStringAsFixed(3)} - ${_isAnomaly! ? 'Anomalie detectee' : 'Comportement normal'}\nModele: ${_model ?? 'non disponible'}',
               ),
             ),
           ),

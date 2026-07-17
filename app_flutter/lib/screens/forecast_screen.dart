@@ -22,6 +22,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
   bool _loading = false;
   String? _error;
   List<double> _forecast = const [];
+  String? _model;
 
   @override
   void dispose() {
@@ -51,6 +52,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
           .toList();
       setState(() {
         _forecast = forecast;
+        _model = response['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -127,6 +129,8 @@ class _ForecastScreenState extends State<ForecastScreen> {
           Text(
             'Forecast: ${_forecast.map((e) => e.toStringAsFixed(1)).join(', ')}',
           ),
+          const SizedBox(height: 6),
+          Text('Modele: ${_model ?? 'non disponible'}'),
         ],
       ],
     );

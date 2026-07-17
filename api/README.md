@@ -77,6 +77,21 @@ Demand forecast:
 }
 ```
 
+Segmentation:
+
+```json
+{
+	"recency": 250,
+	"frequency": 2,
+	"monetary": 450
+}
+```
+
+Notes:
+
+- Les valeurs attendues sont les metriques RFM brutes (pas normalisees entre 0 et 1).
+- `recency` est en jours, `frequency` represente le nombre d'achats, `monetary` la valeur cumulee des achats.
+
 Recommendations:
 
 ```json

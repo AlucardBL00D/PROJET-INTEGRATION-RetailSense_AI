@@ -1,244 +1,118 @@
-# 🛒 RetailSense AI
+# RetailSense AI
 
-### Plateforme intelligente d'analyse et de prédiction pour le commerce de détail
+Plateforme d'analyse et de prediction pour le retail, combinee avec API FastAPI, application Flutter et pipelines ML/DL.
 
-👨‍💻 Développé par **Xavier Archambault**
-🎓 Projet de fin de formation – Technicien en Intelligence Artificielle
+## 1. Contexte
 
----
+RetailSense AI est un projet d'integration de fin de formation en intelligence artificielle.
 
-# Description du projet
+Le projet repond a une question simple: comment convertir des donnees transactionnelles e-commerce en decisions actionnables pour les equipes marketing, operations et relation client.
 
-RetailSense AI est une plateforme intelligente d'analyse et de prédiction destinée au commerce de détail. Le projet a été réalisé dans le cadre du projet d'intégration final du programme de Technicien en Intelligence Artificielle.
+Cas d'usage principaux:
 
-L'objectif principal est de transformer les données d'une entreprise de vente au détail en informations exploitables grâce à l'analyse de données, au Machine Learning, au Deep Learning et à la visualisation décisionnelle.
+- Prediction du churn client
+- Segmentation RFM
+- Prevision de la demande
+- Recommandation de categories produits
+- Detection d'anomalies
+- Analyse de sentiment d'avis clients
 
-La plateforme permet notamment :
-
-* L'analyse du comportement des clients
-* La segmentation de la clientèle
-* La prédiction du churn (attrition client)
-* La prévision de la demande
-* La détection d'anomalies et de fraudes
-* La recommandation de produits
-* L'analyse des avis clients
-* La consultation des résultats via une API REST et une application multiplateforme
-
----
-
-# Objectifs
-
-Ce projet met en pratique l'ensemble des compétences acquises durant les 18 mois de formation :
-
-* Python
-* SQLite
-* Pandas
-* NumPy
-* Scikit-learn
-* TensorFlow / Keras
-* Power BI
-* FastAPI
-* Flutter / Dart
-* Docker
-* Git et GitHub
-
----
-
-# Architecture du projet
+## 2. Apercu Architecture
 
 ```text
-RetailSense_AI/
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│
-├── db/
-│   ├── schema.sql
-│   └── retailsense.db
-│
-├── notebooks/
-│
-├── src/
-│   ├── ingestion/
-│   ├── preprocessing/
-│   ├── machine_learning/
-│   ├── deep_learning/
-│   └── utils/
-│
-├── models/
-│
-├── api/
-│
-├── app_flutter/
-│
-├── powerbi/
-│
-├── docs/
-│
-├── requirements.txt
-│
-└── README.md
+Data sources (CSV + SQL)
+        |
+Preprocessing (Pandas / Numpy)
+        |
+ML / DL training (scikit-learn, TensorFlow)
+        |
+Model registry + artifacts (models/)
+        |
+FastAPI inference layer (api/main.py)
+        |
+Flutter app + Swagger + tests
 ```
 
-Flux de données :
+Architecture technique:
+
+- API: FastAPI + Pydantic
+- IA: scikit-learn + TensorFlow/Keras
+- App client: Flutter
+- Conteneurisation: Docker / docker-compose
+- CI: GitHub Actions (API)
+
+## 3. Structure du depot
 
 ```text
-Sources de données
-        ↓
-    SQLite
-        ↓
-Pandas / NumPy
-        ↓
- Modèles ML & DL
-        ↓
-     FastAPI
-        ↓
- Application Flutter
+RetailSenseAI/
+|- api/                  # API FastAPI et endpoints inference
+|- app_flutter/          # Application mobile/web Flutter
+|- data/                 # Jeux de donnees bruts et preprocesses
+|- docs/                 # Documentation projet et livrables phase 8/9
+|- models/               # Artefacts entraines (joblib, keras, csv)
+|- tests/                # Tests API
+|- scripts/              # Scripts d'execution locale (LAN, mobile)
+|- requirements.txt
+`- README.md
 ```
 
----
+## 4. Installation
 
-# Fonctionnalités
+### 4.1 Prerequis
 
-## Analyse de données
+- Python 3.10+
+- pip
+- (Optionnel) Flutter SDK
+- (Optionnel) Docker Desktop
 
-* Nettoyage et préparation des données
-* Fusion de plusieurs sources de données
-* Création d'indicateurs métier
-* Construction de matrices RFM
-
-## Machine Learning
-
-* Segmentation de clientèle (K-Means, DBSCAN)
-* Prédiction du churn
-* Prévision des ventes
-* Comparaison de plusieurs modèles
-
-## Deep Learning
-
-* MLP pour les données tabulaires
-* LSTM pour la prévision des ventes
-* Transformers pour l'analyse des avis clients
-* Autoencodeurs pour la détection d'anomalies
-* GAN pour la génération de données synthétiques
-* GNN pour les recommandations de produits
-
-## Visualisation
-
-* Tableaux de bord Power BI
-* KPI interactifs
-* Rapports décisionnels
-
-## API REST
-
-* Consultation des prédictions
-* Analyse des clients
-* Prévisions de ventes
-* Recommandations produits
-* Détection d'anomalies
-* Analyse du sentiment d'avis
-
-## Application Flutter
-
-* Tableau de bord
-* Écran de connexion
-* Fiche client (segment + churn + sentiment)
-* Prévision de demande
-* Recommandations personnalisées et score d'anomalie
-
----
-
-# Technologies utilisées
-
-| Domaine            | Technologie        |
-| ------------------ | ------------------ |
-| Programmation      | Python             |
-| Base de données    | SQLite             |
-| Analyse de données | Pandas, NumPy      |
-| Machine Learning   | Scikit-learn       |
-| Deep Learning      | TensorFlow / Keras |
-| API                | FastAPI            |
-| Visualisation      | Power BI           |
-| Application        | Flutter            |
-| Déploiement        | Docker             |
-| Versionnement      | Git / GitHub       |
-
----
-
-# Installation
-
-## Cloner le projet
+### 4.2 Setup local
 
 ```bash
-git clone https://github.com/votre-compte/RetailSense_AI.git
-cd RetailSense_AI
+git clone <URL_DU_DEPOT>
+cd RetailSenseAI
+python -m venv .venv
 ```
 
-## Créer un environnement virtuel
+Remplacer <URL_DU_DEPOT> par l'URL GitHub du projet.
 
-```bash
-python -m venv venv
-```
+Windows PowerShell:
 
-## Activer l'environnement
-
-Windows :
-
-```bash
-& .\.venv\Scripts\Activate.ps1                        
-```
-
-Linux / Mac :
-
-```bash
-source venv/bin/activate
-```
-
-## Installer les dépendances
-
-```bash
+```powershell
+& .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
----
+macOS/Linux:
 
-# Exécution
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-## Lancer l'API
+## 5. Execution
+
+### 5.1 API locale
 
 ```bash
 uvicorn api.main:app --reload --reload-dir api --host 127.0.0.1 --port 8000
 ```
 
-Pour tester depuis un telephone (meme Wi-Fi que le PC), lance l'API en LAN:
+Acces:
 
-```powershell
-.\scripts\run_api_lan.ps1
-```
+- Swagger UI: http://127.0.0.1:8000/docs
+- OpenAPI: http://127.0.0.1:8000/openapi.json
+- Healthcheck: http://127.0.0.1:8000/health
 
-Sinon commande manuelle:
+Variables d'environnement utiles:
 
-```bash
-uvicorn api.main:app --reload --reload-dir api --host 0.0.0.0 --port 8000
-```
+- RETAILSENSE_MODELS_DIR (defaut: ./models)
+- RETAILSENSE_MODEL_REGISTRY_PATH (defaut: ./models/model_registry.json)
+- RETAILSENSE_ANOMALY_THRESHOLD (defaut: 2.5)
+- RETAILSENSE_CORS_ORIGINS (defaut: *)
+- RETAILSENSE_REQUEST_LOG_ENABLED (defaut: true)
+- RETAILSENSE_LOG_LEVEL (defaut: INFO)
 
-Variables d'environnement (préparation phase 8) :
-
-```bash
-RETAILSENSE_MODELS_DIR=./models
-RETAILSENSE_ANOMALY_THRESHOLD=2.5
-RETAILSENSE_API_VERSION=1.1.0
-RETAILSENSE_CORS_ORIGINS=*
-```
-
-Documentation Swagger :
-
-```text
-http://localhost:8000/docs
-```
-
-## Lancer l'application Flutter
+### 5.2 Execution Flutter
 
 ```bash
 cd app_flutter
@@ -246,159 +120,91 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
 ```
 
-Telephone Android physique (API sur le PC):
+Test sur telephone Android (meme Wi-Fi):
 
 ```powershell
+.\scripts\run_api_lan.ps1
 .\scripts\run_flutter_phone.ps1
 ```
 
-Commande manuelle avec IP LAN du PC (exemple):
+## 6. Tests
+
+Tests API:
 
 ```bash
-flutter run --dart-define=API_BASE_URL=http://192.168.1.25:8000
+pytest tests/test_api.py -q
 ```
 
-Android Emulator (API locale) :
+CI automatique:
 
-```bash
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
-```
+- Workflow: .github/workflows/api-ci.yml
 
-## Phase 8 - Deploiement et industrialisation legere
+## 7. Endpoints API
 
-### Dockeriser l'API
+Systeme:
 
-```bash
-cp .env.example .env
-docker compose up --build -d
-```
+- GET /
+- GET /health
+- GET /metadata/models
 
-Verifier l'API:
+Inference:
 
-```bash
-curl http://localhost:8000/health
-curl http://localhost:8000/metadata/models
-```
+- POST /predict/churn
+- POST /predict/segmentation
+- POST /predict/demand
+- POST /predict/recommendations
+- POST /predict/anomaly
+- POST /predict/sentiment
 
-Arret:
+## 8. Resultats et indicateurs
 
-```bash
-docker compose down
-```
+Indicateurs consolides dans models/:
 
-### Variables d'environnement de production
+- Churn: models/churn_metrics_summary.csv
+- Livraison/retard: models/delivery_metrics_summary.csv
+- Historique MLP: models/mlp_history.csv
 
-- `RETAILSENSE_MODELS_DIR`
-- `RETAILSENSE_MODEL_REGISTRY_PATH`
-- `RETAILSENSE_ANOMALY_THRESHOLD`
-- `RETAILSENSE_API_VERSION`
-- `RETAILSENSE_CORS_ORIGINS`
-- `RETAILSENSE_REQUEST_LOG_ENABLED`
-- `RETAILSENSE_LOG_LEVEL`
+Les performances detaillees, limites et comparatifs sont decrits dans:
 
-### Deployer l'API sur Render (gratuit)
+- docs/RAPPORT_TECHNIQUE_PHASE9.md
 
-1. Pousser le projet sur GitHub.
-2. Aller sur Render, choisir **New +** puis **Blueprint**.
-3. Selectionner le repo RetailSenseAI (Render detecte automatiquement `render.yaml`).
-4. Lancer le deploiement et attendre le statut **Live**.
-5. Ouvrir l'URL publique Render et verifier:
+## 9. Captures d'ecran et demonstration
 
-```bash
-curl https://retailsense-api.onrender.com/health
-curl https://retailsense-api.onrender.com/metadata/models
-```
+Elements a inclure dans le portfolio:
 
-Important: remplace `retailsense-api.onrender.com` par ton URL reelle Render.
+- Swagger avec appels endpoint reussis
+- Ecran Flutter dashboard
+- Exemple prediction churn + sentiment
+- Pipeline data/ML (schema)
+- Vue du dashboard Power BI
 
-### Versioning minimal des modeles
+Guide de production des captures:
 
-Le fichier `models/model_registry.json` sert de registre simple des artefacts en production.
-Le endpoint `GET /metadata/models` expose les versions chargees.
+- docs/SCREENSHOTS_GUIDE.md
 
-### Build APK Android (release)
+## 10. Livrables Phase 9
 
-Depuis `app_flutter/`:
+- Rapport technique (15-25 pages): docs/RAPPORT_TECHNIQUE_PHASE9.md
+- Support soutenance (10-15 slides): docs/SOUTENANCE_PHASE9_SLIDES.md
+- Checklist publication portfolio: docs/PHASE_9_PORTFOLIO_PLAN.md
 
-```bash
-flutter pub get
-flutter build apk --release --dart-define=API_BASE_URL=https://retailsense-api.onrender.com
-```
+## 11. Limites actuelles
 
-Important: remplace `retailsense-api.onrender.com` par ton URL publique reelle.
+- Les modeles sont charges depuis des artefacts locaux; pas de model serving distribue.
+- Les jeux de donnees peuvent evoluer et impacter la reproductibilite si non versionnes strictement.
+- Les tests couvrent le contrat API principal mais restent majoritairement orientes integration.
 
-APK de sortie:
+## 13. Roadmap
 
-```text
-app_flutter/build/app/outputs/flutter-apk/app-release.apk
-```
+- Ajouter versionning strict des datasets et model cards.
+- Ajouter tests de performance (latence P95) et robustesse donnees.
+- Mettre en ligne une demo cloud stable (API + front).
 
-### Documentation detaillee
+## 14. Licence
 
-Guide complet de phase 8: `docs/PHASE_8_DEPLOIEMENT.md`
+Ce projet est distribue sous licence MIT.
 
----
+## 15. Auteur
 
-# Jeux de données
-
-Les données utilisées proviennent de jeux de données publics de commerce électronique.
-
-Exemples :
-
-* Olist Brazilian E-Commerce Dataset
-* Online Retail Dataset
-* Amazon Reviews
-* Données transactionnelles publiques ou synthétiques
-
----
-
-# Résultats attendus
-
-* Segmentation automatique des clients
-* Prédiction du risque de départ des clients
-* Prévision des ventes futures
-* Détection des transactions anormales
-* Recommandations personnalisées
-* Analyse automatique des avis clients
-
----
-
-# Améliorations futures
-
-* Authentification des utilisateurs
-* Déploiement Cloud
-* Tableau de bord en temps réel
-* Pipeline MLOps
-* CI/CD automatisée
-* Surveillance des performances des modèles
-
----
-
-# Compétences démontrées
-
-* Analyse de données
-* Machine Learning
-* Deep Learning
-* Développement Backend
-* Développement Mobile
-* Visualisation de données
-* Déploiement Docker
-* Gestion de projet IA
-
----
-
-# Licence
-
-Projet réalisé dans un cadre pédagogique dans le cadre du programme de Technicien en Intelligence Artificielle.
-
----
-
-# Remerciements
-
-Projet réalisé au Collège CDI dans le cadre du programme de Technicien en Intelligence Artificielle.
-
-Professeur encadrant : Reda Mohammed Chatou
-
----
-
-**Développé par Xavier Archambault**
+Xavier Archambault
+Projet d'integration - Technicien en Intelligence Artificielle

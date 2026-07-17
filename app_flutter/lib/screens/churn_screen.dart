@@ -22,6 +22,7 @@ class _ChurnScreenState extends State<ChurnScreen> {
   String? _error;
   int? _prediction;
   double? _risk;
+  String? _model;
 
   @override
   void dispose() {
@@ -49,6 +50,7 @@ class _ChurnScreenState extends State<ChurnScreen> {
       setState(() {
         _prediction = response['prediction'] as int?;
         _risk = (response['risk_probability'] as num?)?.toDouble();
+        _model = response['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -109,7 +111,9 @@ class _ChurnScreenState extends State<ChurnScreen> {
             child: ListTile(
               leading: const Icon(Icons.insights),
               title: Text('Risque: $riskPct%'),
-              subtitle: Text('Classe predite: $_prediction'),
+              subtitle: Text(
+                'Classe predite: $_prediction\nModele: ${_model ?? 'non disponible'}',
+              ),
             ),
           ),
         ],

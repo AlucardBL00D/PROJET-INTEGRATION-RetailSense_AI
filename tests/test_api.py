@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import joblib
+import pytest
 from fastapi.testclient import TestClient
 
+from api import main as api_main
 from api.main import app
 
 
@@ -27,6 +29,14 @@ def test_health_endpoint() -> None:
     assert payload["status"] == "ok"
     assert "models_loaded" in payload
     assert "models_missing" in payload
+
+
+def test_root_endpoint() -> None:
+    response = client.get("/")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["docs"] == "/docs"
 
 
 def test_churn_prediction_endpoint() -> None:
@@ -57,7 +67,7 @@ def test_churn_prediction_endpoint() -> None:
 def test_segmentation_endpoint() -> None:
     response = client.post(
         "/predict/segmentation",
-        json={"recency": 0.2, "frequency": 0.8, "monetary": 0.6},
+        json={"recency": 250, "frequency": 2, "monetary": 450},
     )
     assert response.status_code == 200
     data = response.json()
@@ -110,3 +120,35 @@ def test_sentiment_endpoint() -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["label"] in {"positive", "neutral", "negative"}
+
+
+def test_sentiment_negative_endpoint() -> None:
+    response = client.post(
+        "/predict/sentiment",
+        json={"text": "Livraison en retard, produit mauvais et je suis tres decu"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["label"] == "negative"
+
+
+def test_anomaly_endpoint_rejects_feature_size_mismatch(monkeypatch: pytest.MonkeyPatch) -> None:
+    class _FakeScaler:
+        n_features_in_ = 4
+
+        def transform(self, x):  # pragma: no cover
+            return x
+
+    monkeypatch.setitem(api_main.MODEL_CACHE, "autoencoder_scaler.joblib", _FakeScaler())
+    response = client.post("/predict/anomaly", json={"features": [0.0, 0.1, 0.2]})
+    assert response.status_code == 422
+    payload = response.json()
+    assert "Expected 4 features" in payload["detail"]
+
+
+def test_demand_endpoint_rejects_short_input() -> None:
+    response = client.post(
+        "/predict/demand",
+        json={"recent_daily_orders": [10, 11, 12, 13, 14, 15], "horizon_days": 7},
+    )
+    assert response.status_code == 422

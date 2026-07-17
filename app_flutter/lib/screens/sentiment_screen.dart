@@ -21,6 +21,7 @@ class _SentimentScreenState extends State<SentimentScreen> {
   String? _error;
   String? _label;
   double? _confidence;
+  String? _model;
 
   String _labelToFrench(String label) {
     switch (label.toLowerCase()) {
@@ -28,8 +29,6 @@ class _SentimentScreenState extends State<SentimentScreen> {
         return 'Positif';
       case 'negative':
         return 'Negatif';
-      case 'neutral':
-        return 'Neutre';
       default:
         return label;
     }
@@ -55,6 +54,7 @@ class _SentimentScreenState extends State<SentimentScreen> {
       setState(() {
         _label = response['label']?.toString();
         _confidence = (response['confidence'] as num?)?.toDouble();
+        _model = response['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -87,7 +87,7 @@ class _SentimentScreenState extends State<SentimentScreen> {
           description:
               'Analyser automatiquement le ton des avis pour mesurer la satisfaction client.',
           bullets: [
-            'Identifier avis positifs, neutres et negatifs.',
+            'Identifier avis positifs et negatifs.',
             'Suivre la perception client apres achat.',
           ],
         ),
@@ -134,6 +134,22 @@ class _SentimentScreenState extends State<SentimentScreen> {
                         ? 'Certitude du modele: non disponible'
                         : 'Certitude du modele: $confidenceText%',
                   ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Etats possibles:',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _stateChip('negative', 'Negatif'),
+                      _stateChip('positive', 'Positif'),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text('Modele: ${_model ?? 'non disponible'}'),
                   if (confidencePercent != null) ...[
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
@@ -148,6 +164,18 @@ class _SentimentScreenState extends State<SentimentScreen> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _stateChip(String key, String label) {
+    final selected = _label?.toLowerCase() == key;
+    return Chip(
+      avatar: Icon(
+        selected ? Icons.check_circle : Icons.circle_outlined,
+        size: 18,
+      ),
+      label: Text(label),
+      backgroundColor: selected ? const Color(0xFFFFE5D6) : null,
     );
   }
 }

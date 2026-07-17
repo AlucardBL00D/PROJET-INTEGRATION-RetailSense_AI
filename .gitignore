@@ -12,7 +12,4 @@ __pycache__/
 *.db
 *.pkl
 *.keras
-
-# AI models trop gros pour Github
 models/
-churn_random_forest.joblib

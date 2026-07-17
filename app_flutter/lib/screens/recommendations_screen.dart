@@ -23,6 +23,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   bool _loading = false;
   String? _error;
   List<String> _items = const [];
+  String? _model;
 
   @override
   void dispose() {
@@ -57,6 +58,7 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
         _items = (recommendations['recommendations'] as List<dynamic>)
             .map((item) => item.toString())
             .toList();
+        _model = recommendations['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -123,6 +125,8 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
             'Produits recommandes',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
+          const SizedBox(height: 6),
+          Text('Modele: ${_model ?? 'non disponible'}'),
           const SizedBox(height: 8),
           ..._items.map(
             (item) => Card(

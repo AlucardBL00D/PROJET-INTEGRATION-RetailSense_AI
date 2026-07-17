@@ -13,13 +13,14 @@ class SegmentationScreen extends StatefulWidget {
 }
 
 class _SegmentationScreenState extends State<SegmentationScreen> {
-  final _recencyController = TextEditingController(text: '0.2');
-  final _frequencyController = TextEditingController(text: '0.8');
-  final _monetaryController = TextEditingController(text: '0.6');
+  final _recencyController = TextEditingController(text: '250');
+  final _frequencyController = TextEditingController(text: '2');
+  final _monetaryController = TextEditingController(text: '450');
 
   bool _loading = false;
   String? _error;
   int? _cluster;
+  String? _model;
 
   @override
   void dispose() {
@@ -44,6 +45,7 @@ class _SegmentationScreenState extends State<SegmentationScreen> {
 
       setState(() {
         _cluster = response['cluster'] as int?;
+        _model = response['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -80,9 +82,9 @@ class _SegmentationScreenState extends State<SegmentationScreen> {
           spacing: 12,
           runSpacing: 12,
           children: [
-            _field(_recencyController, 'Recency (0-1)'),
-            _field(_frequencyController, 'Frequency (0-1)'),
-            _field(_monetaryController, 'Monetary (0-1)'),
+            _field(_recencyController, 'Recency (jours, >=0)'),
+            _field(_frequencyController, 'Frequency (>=1)'),
+            _field(_monetaryController, 'Monetary (>=0)'),
           ],
         ),
         const SizedBox(height: 12),
@@ -101,7 +103,9 @@ class _SegmentationScreenState extends State<SegmentationScreen> {
             child: ListTile(
               leading: const Icon(Icons.check_circle_outline),
               title: const Text('Segment detecte'),
-              subtitle: Text('Cluster $_cluster'),
+              subtitle: Text(
+                'Cluster $_cluster\nModele: ${_model ?? 'non disponible'}',
+              ),
             ),
           ),
         ],
