@@ -6,3 +6,33 @@ data/raw/
 data/processed/non_utiliser/
 .vscode/
 .pytest_cache/
+
+# Keep only the sentiment tokenizer source needed at runtime.
+!data/raw/
+data/raw/*
+!data/raw/olist_order_reviews_dataset.csv
+
+# Keep only the graph source needed for GNN recommendations.
+!data/processed/
+data/processed/*
+!data/processed/orders_features.csv
+!data/processed/rfm_standardized.csv
+!data/processed/rfm_segments.csv
+
+# Upload only runtime-required model files.
+models/*
+!models/churn_best.joblib
+!models/preprocessor_cls.joblib
+!models/dbscan_rfm.joblib
+!models/autoencoder_scaler_fraud.joblib
+!models/autoencoder_scaler.joblib
+!models/autoencoder_scaler_fraude.joblib
+!models/autoencoder_fraud_detection.keras
+!models/delivery_best.joblib
+!models/lstm_demand.keras
+!models/rnn_demand.keras
+!models/gnn_native_recommender.weights.h5
+!models/transformer_reviews.keras
+!models/daily_orders.csv
+!models/model_registry.json
+

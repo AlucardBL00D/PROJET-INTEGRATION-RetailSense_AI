@@ -1,0 +1,26 @@
+{
+  "registry_version": "1.0.0",
+  "updated_at": "2026-07-15T00:00:00Z",
+  "models": {
+    "churn_best.joblib": {
+      "version": "2026.07.1",
+      "stage": "production",
+      "owner": "ml-team"
+    },
+    "preprocessor_cls.joblib": {
+      "version": "2026.07.1",
+      "stage": "production",
+      "owner": "ml-team"
+    },
+    "kmeans_rfm.joblib": {
+      "version": "2026.07.1",
+      "stage": "production",
+      "owner": "ml-team"
+    },
+    "autoencoder_scaler.joblib": {
+      "version": "2026.07.1",
+      "stage": "production",
+      "owner": "ml-team"
+    }
+  }
+}
