@@ -13,22 +13,32 @@ class AnomalyScreen extends StatefulWidget {
 }
 
 class _AnomalyScreenState extends State<AnomalyScreen> {
-  static const int _expectedFeatureCount = 7;
-
-  final _featuresController = TextEditingController(
-    text: '0.1,0.2,0.3,0.1,0.0,0.5,0.2',
-  );
+  final _totalPriceController = TextEditingController(text: '150.0');
+  final _totalFreightController = TextEditingController(text: '12.5');
+  final _totalWeightController = TextEditingController(text: '2.1');
+  final _nItemsController = TextEditingController(text: '3');
+  final _maxInstallmentsController = TextEditingController(text: '3');
+  final _paymentValueController = TextEditingController(text: '162.5');
+  final _deliveryDaysController = TextEditingController(text: '4');
+  final _delayDaysController = TextEditingController(text: '0');
 
   bool _loading = false;
   String? _error;
   double? _score;
-  double? _threshold;
   bool? _isAnomaly;
-  String? _model;
+  String? _riskLevel;
+  String? _message;
 
   @override
   void dispose() {
-    _featuresController.dispose();
+    _totalPriceController.dispose();
+    _totalFreightController.dispose();
+    _totalWeightController.dispose();
+    _nItemsController.dispose();
+    _maxInstallmentsController.dispose();
+    _paymentValueController.dispose();
+    _deliveryDaysController.dispose();
+    _delayDaysController.dispose();
     super.dispose();
   }
 
@@ -39,26 +49,32 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
     });
 
     try {
-      final values = _featuresController.text
-          .split(',')
-          .map((v) => double.parse(v.trim()))
-          .toList();
+      final totalPrice = double.parse(_totalPriceController.text.trim());
+      final totalFreight = double.parse(_totalFreightController.text.trim());
+      final totalWeight = double.parse(_totalWeightController.text.trim());
+      final nItems = double.parse(_nItemsController.text.trim());
+      final maxInstallments = double.parse(
+        _maxInstallmentsController.text.trim(),
+      );
+      final paymentValue = double.parse(_paymentValueController.text.trim());
+      final deliveryDays = double.parse(_deliveryDaysController.text.trim());
+      final delayDays = double.parse(_delayDaysController.text.trim());
 
-      if (values.length != _expectedFeatureCount) {
-        setState(() {
-          _error =
-              'Le modele attend $_expectedFeatureCount valeurs, mais ${values.length} ont ete fournies.';
-          _loading = false;
-        });
-        return;
-      }
-
-      final response = await widget.apiClient.predictAnomaly(values);
+      final response = await widget.apiClient.predictAnomaly(
+        totalPrice: totalPrice,
+        totalFreight: totalFreight,
+        totalWeight: totalWeight,
+        nItems: nItems,
+        maxInstallments: maxInstallments,
+        paymentValue: paymentValue,
+        deliveryDays: deliveryDays,
+        delayDays: delayDays,
+      );
       setState(() {
         _score = (response['anomaly_score'] as num?)?.toDouble();
-        _threshold = (response['threshold'] as num?)?.toDouble();
         _isAnomaly = response['is_anomaly'] as bool?;
-        _model = response['model']?.toString();
+        _riskLevel = response['risk_level']?.toString();
+        _message = response['message']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -71,8 +87,7 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hasResult =
-        _score != null && _threshold != null && _isAnomaly != null;
+    final hasResult = _score != null && _isAnomaly != null;
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -94,12 +109,19 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        TextField(
-          controller: _featuresController,
-          decoration: const InputDecoration(
-            labelText: 'Features (7 valeurs separees par des virgules)',
-            border: OutlineInputBorder(),
-          ),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            _numberField(_totalPriceController, 'total_price'),
+            _numberField(_totalFreightController, 'total_freight'),
+            _numberField(_totalWeightController, 'total_weight'),
+            _numberField(_nItemsController, 'n_items'),
+            _numberField(_maxInstallmentsController, 'max_installments'),
+            _numberField(_paymentValueController, 'payment_value'),
+            _numberField(_deliveryDaysController, 'delivery_days'),
+            _numberField(_delayDaysController, 'delay_days'),
+          ],
         ),
         const SizedBox(height: 12),
         FilledButton.icon(
@@ -119,14 +141,30 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
                 : const Color(0xFFEFFAF3),
             child: ListTile(
               leading: Icon(_isAnomaly! ? Icons.warning : Icons.check_circle),
-              title: Text('Score: ${_score!.toStringAsFixed(3)}'),
+              title: Text(
+                'Score d anomalie: ${(_score! * 100).toStringAsFixed(1)}%',
+              ),
               subtitle: Text(
-                'Seuil: ${_threshold!.toStringAsFixed(3)} - ${_isAnomaly! ? 'Anomalie detectee' : 'Comportement normal'}\nModele: ${_model ?? 'non disponible'}',
+                '${_isAnomaly! ? 'Commande inhabituelle detectee' : 'Comportement normal'}\nNiveau de risque: ${_riskLevel ?? 'Faible'}\n${_message ?? ''}',
               ),
             ),
           ),
         ],
       ],
+    );
+  }
+
+  Widget _numberField(TextEditingController controller, String label) {
+    return SizedBox(
+      width: 220,
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
     );
   }
 }

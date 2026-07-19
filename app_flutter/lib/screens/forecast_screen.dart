@@ -22,7 +22,6 @@ class _ForecastScreenState extends State<ForecastScreen> {
   bool _loading = false;
   String? _error;
   List<double> _forecast = const [];
-  String? _model;
 
   @override
   void dispose() {
@@ -52,7 +51,6 @@ class _ForecastScreenState extends State<ForecastScreen> {
           .toList();
       setState(() {
         _forecast = forecast;
-        _model = response['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -130,10 +128,29 @@ class _ForecastScreenState extends State<ForecastScreen> {
             'Forecast: ${_forecast.map((e) => e.toStringAsFixed(1)).join(', ')}',
           ),
           const SizedBox(height: 6),
-          Text('Modele: ${_model ?? 'non disponible'}'),
+          Text(_businessSummary(_forecast)),
         ],
       ],
     );
+  }
+
+  String _businessSummary(List<double> values) {
+    if (values.length < 2) {
+      return 'Demande prevue stable sur la periode selectionnee.';
+    }
+    final start = values.first;
+    final end = values.last;
+    if (start <= 0) {
+      return 'Demande prevue pour ${values.length} jours a venir.';
+    }
+    final deltaPct = ((end - start) / start) * 100;
+    if (deltaPct >= 5) {
+      return 'Demande prevue en hausse de ${deltaPct.toStringAsFixed(1)}% sur ${values.length} jours.';
+    }
+    if (deltaPct <= -5) {
+      return 'Demande prevue en baisse de ${deltaPct.abs().toStringAsFixed(1)}% sur ${values.length} jours.';
+    }
+    return 'Demande prevue globalement stable sur ${values.length} jours.';
   }
 
   Widget _buildChart(List<double> forecast) {

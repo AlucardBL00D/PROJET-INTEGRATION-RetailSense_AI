@@ -21,7 +21,6 @@ class _SentimentScreenState extends State<SentimentScreen> {
   String? _error;
   String? _label;
   double? _confidence;
-  String? _model;
 
   String _labelToFrench(String label) {
     switch (label.toLowerCase()) {
@@ -54,7 +53,6 @@ class _SentimentScreenState extends State<SentimentScreen> {
       setState(() {
         _label = response['label']?.toString();
         _confidence = (response['confidence'] as num?)?.toDouble();
-        _model = response['model']?.toString();
         _loading = false;
       });
     } catch (exc) {
@@ -148,8 +146,6 @@ class _SentimentScreenState extends State<SentimentScreen> {
                       _stateChip('positive', 'Positif'),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text('Modele: ${_model ?? 'non disponible'}'),
                   if (confidencePercent != null) ...[
                     const SizedBox(height: 8),
                     LinearProgressIndicator(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class ApiException implements Exception {
@@ -13,6 +14,8 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
+  static const int _defaultRecommendationsTopK = 5;
+
   final String baseUrl;
   final http.Client _http;
 
@@ -40,18 +43,41 @@ class ApiClient {
     required String category,
     required String paymentType,
     required String customerState,
+    required double recency,
+    required double frequency,
+    required double monetary,
+    required List<String> recentCategories,
   }) async {
+    final now = DateTime.now();
+    final nItems = recentCategories.isEmpty ? 1 : recentCategories.length;
+
+    final maxInstallments = switch (paymentType.toLowerCase()) {
+      'credit_card' => 6,
+      'debit_card' => 2,
+      'boleto' => 1,
+      'voucher' => 1,
+      _ => 3,
+    };
+
+    final totalFreight = (totalPrice * 0.08).clamp(2.0, 120.0).toDouble();
+    final totalWeight = (0.35 * nItems + (monetary / 400.0))
+        .clamp(0.2, 30.0)
+        .toDouble();
+    final deliveryDays = (3 + (recency / 120.0)).clamp(2.0, 10.0).round();
+    final delayDays = ((recency > 260 ? 2 : 0) + (frequency <= 1 ? 1 : 0))
+        .clamp(0, 5);
+
     return _post('/predict/churn', {
       'total_price': totalPrice,
-      'total_freight': 12.5,
-      'total_weight': 2.1,
-      'n_items': 3,
-      'max_installments': 3,
+      'total_freight': totalFreight,
+      'total_weight': totalWeight,
+      'n_items': nItems,
+      'max_installments': maxInstallments,
       'payment_value': totalPrice,
-      'delivery_days': 4,
-      'delay_days': 0,
-      'purchase_month': 7,
-      'purchase_dow': 4,
+      'delivery_days': deliveryDays,
+      'delay_days': delayDays,
+      'purchase_month': now.month,
+      'purchase_dow': now.weekday % 7,
       'main_category': category,
       'payment_type': paymentType,
       'customer_state': customerState,
@@ -76,18 +102,45 @@ class ApiClient {
     required int segment,
     required double churnRisk,
     required List<String> recentCategories,
-    required int topK,
   }) async {
-    return _post('/predict/recommendations', {
+    final payload = {
       'segment': segment,
       'churn_risk': churnRisk,
       'recent_categories': recentCategories,
-      'top_k': topK,
-    });
+      'top_k': _defaultRecommendationsTopK,
+    };
+
+    try {
+      return await _post('/recommend/products', payload);
+    } on ApiException catch (exc) {
+      // Compatibility fallback for older deployments.
+      if (exc.statusCode == 404) {
+        return _post('/predict/recommendations', payload);
+      }
+      rethrow;
+    }
   }
 
-  Future<Map<String, dynamic>> predictAnomaly(List<double> features) async {
-    return _post('/predict/anomaly', {'features': features});
+  Future<Map<String, dynamic>> predictAnomaly({
+    required double totalPrice,
+    required double totalFreight,
+    required double totalWeight,
+    required double nItems,
+    required double maxInstallments,
+    required double paymentValue,
+    required double deliveryDays,
+    required double delayDays,
+  }) async {
+    return _post('/predict/anomaly', {
+      'total_price': totalPrice,
+      'total_freight': totalFreight,
+      'total_weight': totalWeight,
+      'n_items': nItems,
+      'max_installments': maxInstallments,
+      'payment_value': paymentValue,
+      'delivery_days': deliveryDays,
+      'delay_days': delayDays,
+    });
   }
 
   Future<Map<String, dynamic>> _get(String path) async {
@@ -96,6 +149,8 @@ class ApiClient {
           .get(_uri(path))
           .timeout(const Duration(seconds: 8));
       return _decode(response);
+    } on ApiException {
+      rethrow;
     } catch (exc) {
       throw ApiException('Network error: $exc');
     }
@@ -106,6 +161,9 @@ class ApiClient {
     Map<String, dynamic> payload,
   ) async {
     try {
+      if (kDebugMode) {
+        debugPrint('[ApiClient] POST $path payload=$payload');
+      }
       final response = await _http
           .post(
             _uri(path),
@@ -113,25 +171,54 @@ class ApiClient {
             body: jsonEncode(payload),
           )
           .timeout(const Duration(seconds: 12));
-      return _decode(response);
+      final decoded = _decode(response);
+      if (kDebugMode) {
+        debugPrint('[ApiClient] POST $path response=$decoded');
+      }
+      return decoded;
+    } on ApiException {
+      rethrow;
     } catch (exc) {
+      if (kDebugMode) {
+        debugPrint('[ApiClient] POST $path error=$exc');
+      }
       throw ApiException('Network error: $exc');
     }
   }
 
   Map<String, dynamic> _decode(http.Response response) {
-    final body = response.body.isEmpty ? '{}' : response.body;
-    final decoded = jsonDecode(body);
-    if (decoded is! Map<String, dynamic>) {
+    final body = response.body;
+    Map<String, dynamic>? decoded;
+
+    if (body.isNotEmpty) {
+      try {
+        final parsed = jsonDecode(body);
+        if (parsed is Map<String, dynamic>) {
+          decoded = parsed;
+        }
+      } on FormatException {
+        decoded = null;
+      }
+    }
+
+    if (response.statusCode >= 400) {
+      final detail = decoded?['detail']?.toString();
+      final fallback = body.trim().isEmpty
+          ? 'HTTP ${response.statusCode}'
+          : body.trim().replaceAll(RegExp(r'\s+'), ' ');
       throw ApiException(
-        'Invalid API response format',
+        detail == null || detail.isEmpty ? fallback : detail,
         statusCode: response.statusCode,
       );
     }
-    if (response.statusCode >= 400) {
-      final detail = decoded['detail'] ?? 'HTTP ${response.statusCode}';
-      throw ApiException(detail.toString(), statusCode: response.statusCode);
+
+    if (decoded == null) {
+      throw ApiException(
+        'Invalid API response format (status ${response.statusCode})',
+        statusCode: response.statusCode,
+      );
     }
+
     return decoded;
   }
 }

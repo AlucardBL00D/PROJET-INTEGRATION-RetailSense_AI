@@ -129,7 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           icon: Icons.recommend,
           title: 'Recommendations personnalisees',
           subtitle:
-              'Produits proposes selon segment, categories recentes et risque de depart.',
+              'Fiche client claire, actions suggerees et produits recommandes avec explications metier.',
         ),
         const _ServiceTile(
           icon: Icons.shield,

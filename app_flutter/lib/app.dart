@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'config/api_config.dart';
 import 'screens/anomaly_screen.dart';
-import 'screens/churn_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/forecast_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/recommendations_screen.dart';
-import 'screens/segmentation_screen.dart';
 import 'screens/sentiment_screen.dart';
 import 'services/api_client.dart';
 
@@ -81,16 +79,6 @@ class _AppShellState extends State<_AppShell> {
         icon: Icons.dashboard,
         label: 'Vue globale',
         page: DashboardScreen(apiClient: widget.apiClient),
-      ),
-      _Module(
-        icon: Icons.bubble_chart,
-        label: 'Segmentation client',
-        page: SegmentationScreen(apiClient: widget.apiClient),
-      ),
-      _Module(
-        icon: Icons.person_off,
-        label: 'Prediction churn',
-        page: ChurnScreen(apiClient: widget.apiClient),
       ),
       _Module(
         icon: Icons.trending_up,
