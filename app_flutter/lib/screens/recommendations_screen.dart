@@ -185,6 +185,17 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
     return const Color(0xFFC62828);
   }
 
+  double _displayChurnRisk(double rawRisk) {
+    final risk = rawRisk.clamp(0.0, 1.0);
+    if (risk < 0.40) {
+      return risk * 0.80;
+    }
+    if (risk < 0.70) {
+      return 0.32 + (risk - 0.40) * 0.90;
+    }
+    return (0.59 + (risk - 0.70) * 1.35).clamp(0.0, 1.0);
+  }
+
   String generateRecommendationMessage({
     required int segment,
     required double risk,
@@ -339,8 +350,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
 
   Widget _buildCustomerProfileCard(BuildContext context) {
     final hasProfile = _segmentLabel != null && _churnRisk != null;
-    final risk = _churnRisk ?? 0;
-    final riskColor = _getRiskColor(risk);
+    final rawRisk = _churnRisk ?? 0;
+    final displayRisk = _displayChurnRisk(rawRisk);
+    final riskColor = _getRiskColor(displayRisk);
 
     return Card(
       elevation: 2,
@@ -409,11 +421,19 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                     Text(_segmentDescription ?? ''),
                     const SizedBox(height: 4),
                     Text(
-                      'Risque de churn: ${_riskLevel ?? getRiskLevel(risk)}',
+                      'Risque de depart client (API): ${_riskLevel ?? getRiskLevel(displayRisk)}',
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Score de risque: ${(risk * 100).toStringAsFixed(1)} %',
+                      'Score interprete (affichage): ${(displayRisk * 100).toStringAsFixed(1)} %',
+                      style: TextStyle(
+                        color: riskColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Score brut modele: ${(rawRisk * 100).toStringAsFixed(1)} %',
                       style: TextStyle(
                         color: riskColor,
                         fontWeight: FontWeight.w600,

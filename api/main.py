@@ -1236,15 +1236,18 @@ def predict_churn(payload: ChurnRequest) -> ChurnResponse:
         probability = _safe_probability_from_model(model, transformed)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Churn inference failed: {exc}") from exc
-    if probability >= 0.70:
+    if probability >= 0.92:
+        risk_level = "Critique"
+        message = "Risque tres eleve selon le modele, prioriser une action de retention immediate."
+    elif probability >= 0.75:
         risk_level = "Eleve"
-        message = "Client inactif depuis plusieurs mois ou engagement en baisse."
-    elif probability >= 0.40:
+        message = "Risque eleve detecte, une relance personnalisee est recommandee rapidement."
+    elif probability >= 0.50:
         risk_level = "Moyen"
-        message = "Diminution d'activite detectee, un suivi commercial est recommande."
+        message = "Risque intermediaire detecte, surveiller l'activite et proposer une offre ciblee."
     else:
         risk_level = "Faible"
-        message = "Activite client globalement stable."
+        message = "Risque limite, maintenir les actions de fidelisation en cours."
 
     logger.info(
         "churn.output probability_raw=%.6f probability_returned=%.4f risk_level=%s",
