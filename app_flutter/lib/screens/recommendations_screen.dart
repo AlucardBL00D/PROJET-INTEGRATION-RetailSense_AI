@@ -301,23 +301,6 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   }
 
   List<String> _normalizeCategories(List<String> categories) {
-    const mapping = {
-      'electronics': 'computers_accessories',
-      'accessories': 'watches_gifts',
-      'beauty': 'health_beauty',
-      'sports': 'sports_leisure',
-      'furniture': 'furniture_decor',
-      'home': 'housewares',
-      'decor': 'furniture_decor',
-      'kids': 'toys',
-      'toys': 'toys',
-      'phone': 'telephony',
-      'phones': 'telephony',
-      'auto': 'auto',
-      'bed': 'bed_bath_table',
-      'bath': 'bed_bath_table',
-    };
-
     return categories.map(_normalizeSingleCategory).toSet().toList();
   }
 
