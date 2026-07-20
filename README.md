@@ -79,7 +79,7 @@ RetailSenseAI/
 ### 5.2 Setup
 
 ```bash
-git clone <URL_DU_DEPOT>
+git clone https://github.com/AlucardBL00D/PROJET-INTEGRATION-RetailSense_AI
 cd RetailSenseAI
 python -m venv .venv
 ```
