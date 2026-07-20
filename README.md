@@ -1,79 +1,88 @@
 # RetailSense AI
 
-Plateforme d'analyse et de prediction pour le retail, combinee avec API FastAPI, application Flutter et pipelines ML/DL.
+Plateforme d'analyse predictive pour le retail qui combine une API FastAPI, une application Flutter et plusieurs pipelines ML/DL pour transformer des donnees e-commerce en decisions actionnables.
 
-## 1. Contexte
+## 1. Vue d'ensemble
 
-RetailSense AI est un projet d'integration de fin de formation en intelligence artificielle.
+RetailSense AI est un projet d'integration de fin de formation en intelligence artificielle. L'objectif est de centraliser plusieurs cas d'usage IA dans une meme solution exploitable par des equipes marketing, operations et relation client.
 
-Le projet repond a une question simple: comment convertir des donnees transactionnelles e-commerce en decisions actionnables pour les equipes marketing, operations et relation client.
+Cas d'usage couverts:
 
-Cas d'usage principaux:
-
+- Prevision de la demande
 - Prediction du churn client
 - Segmentation RFM
-- Prevision de la demande
 - Recommandation de categories produits
 - Detection d'anomalies
 - Analyse de sentiment d'avis clients
 
-## 2. Apercu Architecture
+## 2. Architecture
 
 ```text
-Data sources (CSV + SQL)
+Sources de donnees (CSV + SQL)
         |
-Preprocessing (Pandas / Numpy)
+Preprocessing (Pandas / NumPy)
         |
-ML / DL training (scikit-learn, TensorFlow)
+Entrainement ML / DL (scikit-learn, TensorFlow / Keras)
         |
-Model registry + artifacts (models/)
+Registre de modeles + artefacts (models/)
         |
-FastAPI inference layer (api/main.py)
+Couche d'inference FastAPI (api/main.py)
         |
-Flutter app + Swagger + tests
+Application Flutter + Swagger + tests API
 ```
 
-Architecture technique:
+Stack technique:
 
-- API: FastAPI + Pydantic
-- IA: scikit-learn + TensorFlow/Keras
-- App client: Flutter
-- Conteneurisation: Docker / docker-compose
-- CI: GitHub Actions (API)
+- Backend API: FastAPI + Pydantic
+- Machine Learning: scikit-learn
+- Deep Learning: TensorFlow / Keras
+- Application cliente: Flutter
+- Deploiement: Docker, docker-compose, Render
+- Validation: pytest + GitHub Actions
 
-## 3. Structure du depot
+## 3. Fonctionnalites principales
+
+- Exposition des modeles via une API REST documentee avec Swagger
+- Consultation de l'etat des artefacts et du registre des modeles
+- Interface Flutter pour tester les cas d'usage metier
+- Scripts de lancement local pour usage desktop, web et telephone Android
+- Artefacts pre-entraines deja inclus dans le depot pour les demonstrations
+
+## 4. Structure du depot
 
 ```text
 RetailSenseAI/
-|- api/                  # API FastAPI et endpoints inference
-|- app_flutter/          # Application mobile/web Flutter
-|- data/                 # Jeux de donnees bruts et preprocesses
-|- docs/                 # Documentation projet et livrables phase 8/9
-|- models/               # Artefacts entraines (joblib, keras, csv)
+|- api/                  # API FastAPI et endpoints d'inference
+|- app_flutter/          # Application Flutter mobile/web
+|- data/                 # Donnees brutes et preprocesses
+|- docs/                 # Documentation projet et livrables
+|- models/               # Modeles entraines et metriques consolidees
+|- notebooks/            # Notebooks de construction, traitement et entrainement
+|- scripts/              # Scripts d'execution locale et LAN
+|- src/                  # Scripts techniques et verifications ponctuelles
 |- tests/                # Tests API
-|- scripts/              # Scripts d'execution locale (LAN, mobile)
+|- docker-compose.yml
+|- Dockerfile
 |- requirements.txt
 `- README.md
 ```
 
-## 4. Installation
+## 5. Installation locale
 
-### 4.1 Prerequis
+### 5.1 Prerequis
 
-- Python 3.10+
+- Python 3.10 ou plus recent
 - pip
-- (Optionnel) Flutter SDK
-- (Optionnel) Docker Desktop
+- Flutter SDK pour lancer l'application cliente
+- Docker Desktop pour le deploiement conteneurise
 
-### 4.2 Setup local
+### 5.2 Setup
 
 ```bash
 git clone <URL_DU_DEPOT>
 cd RetailSenseAI
 python -m venv .venv
 ```
-
-Remplacer <URL_DU_DEPOT> par l'URL GitHub du projet.
 
 Windows PowerShell:
 
@@ -82,37 +91,39 @@ Windows PowerShell:
 pip install -r requirements.txt
 ```
 
-macOS/Linux:
+macOS / Linux:
 
 ```bash
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 5. Execution
+## 6. Demarrage rapide
 
-### 5.1 API locale
+### 6.1 API FastAPI en local
 
 ```bash
 uvicorn api.main:app --reload --reload-dir api --host 127.0.0.1 --port 8000
 ```
 
-Acces:
+Acces utiles:
 
 - Swagger UI: http://127.0.0.1:8000/docs
-- OpenAPI: http://127.0.0.1:8000/openapi.json
+- OpenAPI JSON: http://127.0.0.1:8000/openapi.json
 - Healthcheck: http://127.0.0.1:8000/health
+- Metadonnees modeles: http://127.0.0.1:8000/metadata/models
 
-Variables d'environnement utiles:
+Variables d'environnement prises en charge:
 
-- RETAILSENSE_MODELS_DIR (defaut: ./models)
-- RETAILSENSE_MODEL_REGISTRY_PATH (defaut: ./models/model_registry.json)
-- RETAILSENSE_ANOMALY_THRESHOLD (defaut: 2.5)
-- RETAILSENSE_CORS_ORIGINS (defaut: *)
-- RETAILSENSE_REQUEST_LOG_ENABLED (defaut: true)
-- RETAILSENSE_LOG_LEVEL (defaut: INFO)
+- RETAILSENSE_MODELS_DIR, defaut `./models`
+- RETAILSENSE_MODEL_REGISTRY_PATH, defaut `./models/model_registry.json`
+- RETAILSENSE_ANOMALY_THRESHOLD, defaut `2.5`
+- RETAILSENSE_API_VERSION, defaut `1.1.0`
+- RETAILSENSE_CORS_ORIGINS, defaut `*`
+- RETAILSENSE_REQUEST_LOG_ENABLED, defaut `true`
+- RETAILSENSE_LOG_LEVEL, defaut `INFO`
 
-### 5.2 Execution Flutter
+### 6.2 Application Flutter
 
 ```bash
 cd app_flutter
@@ -120,26 +131,19 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
 ```
 
-Test sur telephone Android (meme Wi-Fi):
+Telephone Android physique sur le meme reseau Wi-Fi:
 
 ```powershell
 .\scripts\run_api_lan.ps1
 .\scripts\run_flutter_phone.ps1
 ```
 
-## 6. Tests
+Autres cibles utiles:
 
-Tests API:
+- Android emulator: `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000`
+- Web Chrome: `flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8000`
 
-```bash
-pytest tests/test_api.py -q
-```
-
-CI automatique:
-
-- Workflow: .github/workflows/api-ci.yml
-
-## 7. Endpoints API
+## 7. API disponible
 
 Systeme:
 
@@ -156,55 +160,73 @@ Inference:
 - POST /predict/anomaly
 - POST /predict/sentiment
 
-## 8. Resultats et indicateurs
+## 8. Tests et CI
 
-Indicateurs consolides dans models/:
+Lancement local des tests API:
 
-- Churn: models/churn_metrics_summary.csv
-- Livraison/retard: models/delivery_metrics_summary.csv
-- Historique MLP: models/mlp_history.csv
+```bash
+pytest tests/test_api.py -q
+```
 
-Les performances detaillees, limites et comparatifs sont decrits dans:
+Validation automatique:
 
-- docs/RAPPORT_TECHNIQUE_PHASE9.md
+- Workflow GitHub Actions: `.github/workflows/api-ci.yml`
+- Python CI: 3.11
+- Variables de tests configurees pour charger les artefacts locaux du dossier `models/`
 
-## 9. Captures d'ecran et demonstration
+## 9. Deploiement
 
-Elements a inclure dans le portfolio:
+### 9.1 Docker local
 
-- Swagger avec appels endpoint reussis
-- Ecran Flutter dashboard
-- Exemple prediction churn + sentiment
-- Pipeline data/ML (schema)
-- Vue du dashboard Power BI
+```bash
+docker compose up --build
+```
 
-Guide de production des captures:
+### 9.2 Render
 
-- docs/SCREENSHOTS_GUIDE.md
+Le fichier `render.yaml` decrit un service web Docker `retailsense-api` avec:
 
-## 10. Livrables Phase 9
+- Healthcheck sur `/health`
+- Chargement des modeles depuis `/app/models`
+- Configuration predefinie des variables d'environnement principales
+- Auto deploy active
 
-- Rapport technique (15-25 pages): docs/RAPPORT_TECHNIQUE_PHASE9.md
-- Support soutenance (10-15 slides): docs/SOUTENANCE_PHASE9_SLIDES.md
-- Checklist publication portfolio: docs/PHASE_9_PORTFOLIO_PLAN.md
+## 10. Resultats et artefacts
 
-## 11. Limites actuelles
+Artefacts et indicateurs disponibles dans `models/`:
 
-- Les modeles sont charges depuis des artefacts locaux; pas de model serving distribue.
-- Les jeux de donnees peuvent evoluer et impacter la reproductibilite si non versionnes strictement.
-- Les tests couvrent le contrat API principal mais restent majoritairement orientes integration.
+- `churn_metrics_summary.csv`
+- `delivery_metrics_summary.csv`
+- `mlp_history.csv`
+- `model_registry.json`
+- Modeles `joblib`, `keras` et poids `h5`
 
-## 13. Roadmap
+## 11. Documentation associee
 
-- Ajouter versionning strict des datasets et model cards.
-- Ajouter tests de performance (latence P95) et robustesse donnees.
-- Mettre en ligne une demo cloud stable (API + front).
+Documents utiles dans `docs/`:
+
+- `PHASE_8_DEPLOIEMENT.md`
+- `PHASE_9_PORTFOLIO_PLAN.md`
+- `Guide_Modules_ML_DL_RetailSense.txt`
+- Livrables PDF et notebook de deploiement
+
+Documentation complementaire:
+
+- `api/README.md` pour les exemples de payloads API
+- `app_flutter/README.md` pour le lancement multi-plateforme Flutter
+
+## 12. Limites actuelles
+
+- Les modeles sont servis depuis des artefacts locaux et non depuis une infrastructure de model serving dediee.
+- La reproductibilite depend du versionnage des jeux de donnees et des artefacts.
+- Les tests se concentrent surtout sur le contrat API et moins sur des suites fonctionnelles de bout en bout.
+- Le projet cible en priorite la demonstration technique et pedagogique plutot qu'une exploitation de production a grande echelle.
+
+## 13. Auteur
+
+Xavier Archambault  
+Projet d'integration - Technicien en Intelligence Artificielle
 
 ## 14. Licence
 
 Ce projet est distribue sous licence MIT.
-
-## 15. Auteur
-
-Xavier Archambault
-Projet d'integration - Technicien en Intelligence Artificielle
