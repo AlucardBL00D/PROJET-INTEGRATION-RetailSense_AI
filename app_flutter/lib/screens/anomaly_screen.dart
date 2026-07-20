@@ -142,7 +142,7 @@ class _AnomalyScreenState extends State<AnomalyScreen> {
             child: ListTile(
               leading: Icon(_isAnomaly! ? Icons.warning : Icons.check_circle),
               title: Text(
-                'Score d anomalie: ${(_score! * 100).toStringAsFixed(1)}%',
+                'Score d\'anomalie: ${(_score! * 100).toStringAsFixed(1)}%',
               ),
               subtitle: Text(
                 '${_isAnomaly! ? 'Commande inhabituelle detectee' : 'Comportement normal'}\nNiveau de risque: ${_riskLevel ?? 'Faible'}\n${_message ?? ''}',
