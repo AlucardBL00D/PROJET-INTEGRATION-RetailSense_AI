@@ -404,19 +404,11 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                     Text(_segmentDescription ?? ''),
                     const SizedBox(height: 4),
                     Text(
-                      'Risque de depart client (API): ${_riskLevel ?? getRiskLevel(displayRisk)}',
+                      'Risque de depart client: ${_riskLevel ?? getRiskLevel(displayRisk)}',
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Score interprete (affichage): ${(displayRisk * 100).toStringAsFixed(1)} %',
-                      style: TextStyle(
-                        color: riskColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Score brut modele: ${(rawRisk * 100).toStringAsFixed(1)} %',
+                      'Score de risque de depart: ${(displayRisk * 100).toStringAsFixed(1)} %',
                       style: TextStyle(
                         color: riskColor,
                         fontWeight: FontWeight.w600,

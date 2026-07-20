@@ -115,11 +115,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         const SizedBox(height: 10),
         const _ServiceTile(
-          icon: Icons.person_search,
-          title: 'Profil client intelligent',
-          subtitle: 'Segmentation RFM, risque de churn et sentiment en 1 page.',
-        ),
-        const _ServiceTile(
           icon: Icons.trending_up,
           title: 'Prevision de la demande',
           subtitle:
@@ -136,6 +131,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title: 'Surveillance d\'anomalies',
           subtitle:
               'Detection d\'activites atypiques ou suspectes en quasi temps reel.',
+        ),
+        const _ServiceTile(
+          icon: Icons.person_search,
+          title: 'Sentiment d\'un avis',
+          subtitle: 'Analyser le ton des avis pour mesurer la satisfaction client',
         ),
       ],
     );
